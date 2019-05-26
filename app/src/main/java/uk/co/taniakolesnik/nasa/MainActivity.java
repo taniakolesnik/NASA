@@ -93,6 +93,45 @@ public class MainActivity extends YouTubeBaseActivity {
 
                     String imageInfo = getString(R.string.image_info, response.body().getTitle(), response.body().getCopyright());
                     textView.setText(imageInfo);
+                    String imageUrl = response.body().getHdurl();
+                    Picasso.get()
+                            .load(imageUrl)
+                            .into(new Target() {
+                                @Override
+                                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                    assert imageView != null;
+                                    imageView.setImageBitmap(bitmap);
+                                    Palette.from(bitmap)
+                                            .generate(new Palette.PaletteAsyncListener() {
+                                                @Override
+                                                public void onGenerated(Palette palette) {
+                                                    Palette.Swatch darkSwatch = palette.getDarkVibrantSwatch();
+                                                    if (darkSwatch != null) {
+//                                                        Objects.requireNonNull(getSupportActionBar())
+//                                                                .setBackgroundDrawable(new ColorDrawable(darkSwatch.getRgb()));
+                                                    }
+
+                                                    Palette.Swatch swatch = palette.getDarkMutedSwatch();
+                                                    if (swatch != null) {
+                                                        imageView.setBackgroundColor(swatch.getRgb());
+                                                        getWindow().setStatusBarColor(swatch.getRgb());
+                                                    }
+
+
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                                }
+
+                                @Override
+                                public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                                }
+                            });
 
                 } else {
                     //TODO add default pic load if load from internet failed
