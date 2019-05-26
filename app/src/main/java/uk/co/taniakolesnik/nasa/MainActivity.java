@@ -1,11 +1,18 @@
 package uk.co.taniakolesnik.nasa;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,11 +63,45 @@ public class MainActivity extends AppCompatActivity {
                     String imageUrl = response.body().getHdurl();
                     Picasso.get()
                             .load(imageUrl)
-                            .fit()
-                            .centerCrop()
-                            .into(mainImage);
+                            .into(new Target() {
+                                @Override
+                                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                    assert mainImage != null;
+                                    mainImage.setImageBitmap(bitmap);
+                                    Palette.from(bitmap)
+                                            .generate(new Palette.PaletteAsyncListener() {
+                                                @Override
+                                                public void onGenerated(Palette palette) {
+                                                    Palette.Swatch darkSwatch = palette.getDarkVibrantSwatch();
+                                                    if (darkSwatch != null) {
+                                                        Objects.requireNonNull(getSupportActionBar())
+                                                                .setBackgroundDrawable(new ColorDrawable(darkSwatch.getRgb()));
+                                                    }
+
+                                                    Palette.Swatch swatch = palette.getDarkMutedSwatch();
+                                                    if (swatch != null) {
+                                                        mainImage.setBackgroundColor(swatch.getRgb());
+                                                        getWindow().setStatusBarColor(swatch.getRgb());
+                                                    }
+
+
+                                                }
+                                            });
+                                }
+
+                                @Override
+                                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                                }
+
+                                @Override
+                                public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                                }
+                            });
+
                 } else {
-                   //TODO add default pic load if load from intenret failed
+                    //TODO add default pic load if load from internet failed
                     Log.d(TAG, "onResponse: response.body() is NULL");
                 }
             }
@@ -76,5 +117,16 @@ public class MainActivity extends AppCompatActivity {
         return "2019-05-25";
     }
 
+    public void setBackgroundColor(Bitmap bitmap) {
+        Palette palette = createPaletteSync(bitmap);
+        Palette.Swatch swatch = palette.getVibrantSwatch();
+        if (swatch != null) {
+            mainImage.setBackgroundColor(swatch.getRgb());
+        }
+    }
+
+    public Palette createPaletteSync(Bitmap bitmap) {
+        return Palette.from(bitmap).generate();
+    }
 
 }
