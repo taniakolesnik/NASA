@@ -18,6 +18,8 @@ import com.google.android.youtube.player.YouTubePlayerView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -152,7 +154,11 @@ public class MainActivity extends YouTubeBaseActivity {
         onInitializedListener = new YouTubePlayer.OnInitializedListener() {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-                youTubePlayer.loadVideo("PBL1RBj-P1g");
+                String pre = "https://www.youtube.com/embed/";
+                String post="?rel=0";
+                String code = StringUtils.substringBetween(srcUlr, pre, post);
+                Log.d(TAG, "onInitializationSuccess: " + code);
+                youTubePlayer.loadVideo(code);
             }
 
             @Override
