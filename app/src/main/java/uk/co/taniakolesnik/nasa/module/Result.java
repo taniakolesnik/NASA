@@ -3,7 +3,7 @@ package uk.co.taniakolesnik.nasa.module;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ApodResult {
+public class Result {
 
     @SerializedName("copyright")
     @Expose
@@ -12,6 +12,10 @@ public class ApodResult {
     @SerializedName("date")
     @Expose
     private String date;
+
+    @SerializedName("explanation")
+    @Expose
+    private String explanation;
 
     @SerializedName("hdurl")
     @Expose
@@ -33,7 +37,7 @@ public class ApodResult {
     @Expose
     private String url;
 
-    public ApodResult(String copyright, String date, String hdurl, String media_type, String service_version, String title, String url) {
+    public Result(String copyright, String date, String hdurl, String media_type, String service_version, String title, String url) {
         this.copyright = copyright;
         this.date = date;
         this.hdurl = hdurl;
@@ -43,7 +47,7 @@ public class ApodResult {
         this.url = url;
     }
 
-    public ApodResult() {
+    public Result() {
     }
 
     public String getCopyright() {
