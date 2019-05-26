@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">NASA</string>
     <string name="image_info">%1$s by %2$s</string>
+    <string name="intent_current_date_key">date</string>
 </resources>
