@@ -3,32 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    android:background="@android:color/black"
     android:orientation="vertical">
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="500dp">
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:background="@color/colorPrimary"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="500dp">
 
-    <view
-        android:id="@+id/view"
-        class="com.google.android.youtube.player.YouTubePlayerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"  />
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"  />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
 
-</RelativeLayout>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/image_info_textView"
@@ -37,7 +30,7 @@
         android:background="@android:color/black"
         android:textAlignment="center"
         android:paddingTop="24dp"
-        android:textSize="24sp"
+        android:textSize="18sp"
         android:fontFamily="sans-serif"
         android:textColor="@android:color/white"
         tools:text="TEST" />

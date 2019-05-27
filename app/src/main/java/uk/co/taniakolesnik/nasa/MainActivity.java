@@ -1,22 +1,13 @@
 package uk.co.taniakolesnik.nasa;
 
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.google.android.youtube.player.YouTubeBaseActivity;
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerView;
-import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.Picasso;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -32,26 +23,25 @@ import uk.co.taniakolesnik.nasa.module.Result;
 import uk.co.taniakolesnik.nasa.retrofit.Client;
 import uk.co.taniakolesnik.nasa.retrofit.ServiceGenerator;
 
-public class MainActivity extends YouTubeBaseActivity {
+public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "Sunday";
-    @BindView(R.id.imageView)
-    ImageView imageView;
-
-    @BindView(R.id.image_info_textView)
-    TextView textView;
+    private static final String TAG = "Monday";
 
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
 
-    @BindView(R.id.view)
-    YouTubePlayerView playerView;
+    @BindView(R.id.fragment_container)
+    FrameLayout fragmentView;
+
+    @BindView(R.id.image_info_textView)
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         progressBar.setVisibility(View.VISIBLE);
 
         Intent intent = getIntent();
@@ -59,15 +49,30 @@ public class MainActivity extends YouTubeBaseActivity {
         final String date = intent.getStringExtra(key) != null ? intent.getStringExtra(key) : getCurrentDate();
 
         getApod(date);
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                intent.putExtra("date", getPreviousDate(date));
-                startActivity(intent);
-                finish();
-            }
-        });
+    }
+
+    private String getPreviousDate(String current) {
+        LocalDate currentDate = LocalDate.parse(current);
+        LocalDate previousDate = currentDate.minusDays(1);
+        String previous = previousDate.toString();
+        return previous;
+    }
+
+    private String getNextDate(String current) {
+        if (getCurrentDate().equals(current)) {
+            return current;
+        }
+        LocalDate currentDate = LocalDate.parse(current);
+        LocalDate previousDate = currentDate.plusDays(1);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        String next = format.format(previousDate);
+        return next;
+    }
+
+    private String getCurrentDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        Date date = new Date(System.currentTimeMillis());
+        return formatter.format(date);
     }
 
     private void getApod(String date) {
@@ -77,24 +82,23 @@ public class MainActivity extends YouTubeBaseActivity {
 
     private void makeCall(String date) {
         Client client = ServiceGenerator.createService(Client.class);
-        Call<Result> call = client.getApod(BuildConfig.API_KEY, date, true);
+        Call<Result> call = client.getApod(BuildConfig.API_KEY, "2019-05-25", true);
         call.enqueue(new Callback<Result>() {
             @Override
             public void onResponse(Call<Result> call, Response<Result> response) {
                 if (response.body() != null) {
                     String mediaType = response.body().getMedia_type();
-                    String srcUlr;
                     String imageInfo = getString(R.string.image_info, response.body().getTitle(), response.body().getCopyright());
+                    textView.setText(imageInfo);
+                    Log.d(TAG, "makeCall: imageInfo " + imageInfo);
                     switch (mediaType) {
                         case "video":
                             Log.d(TAG, "makeCall: video");
-                            srcUlr = response.body().getUrl();
-                            setVideo(srcUlr, imageInfo);
+                            setVideo(response.body().getUrl());
                             break;
                         case "image":
                             Log.d(TAG, "makeCall: image");
-                            srcUlr = response.body().getHdurl();
-                            setImage(srcUlr, imageInfo);
+                            setImage(response.body().getHdurl());
                             break;
                     }
                 } else {
@@ -109,68 +113,25 @@ public class MainActivity extends YouTubeBaseActivity {
         });
     }
 
-    private void setVideo(final String srcUlr, String info) {
-        playerView.setVisibility(View.VISIBLE);
-        imageView.setVisibility(View.GONE);
+    private void setVideo(final String url) {
         progressBar.setVisibility(View.GONE);
-        YouTubePlayer.OnInitializedListener onInitializedListener = new YouTubePlayer.OnInitializedListener() {
-            @Override
-            public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-                String pre = "https://www.youtube.com/embed/";
-                String post = "?rel=0";
-                String code = StringUtils.substringBetween(srcUlr, pre, post);
-                Log.d(TAG, "onInitializationSuccess: " + code);
-                youTubePlayer.loadVideo(code);
-            }
-
-            @Override
-            public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-                Log.d(TAG, "onInitializationFailure : Failed");
-            }
-        };
-        textView.setText(info);
-        playerView.initialize(BuildConfig.YOUTUBE_API_KEY, onInitializedListener);
+        VideoFragment fragment = VideoFragment.newInstance(url);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
 
     }
 
-
-    private void setImage(String imageUrl, String info) {
-        playerView.setVisibility(View.GONE);
-        imageView.setVisibility(View.VISIBLE);
-        Picasso.get()
-                .load(imageUrl)
-                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .placeholder(new ColorDrawable(getColor(R.color.colorPrimary)))
-                .error(R.drawable.placehoulder)
-                .fit()
-                .centerInside()
-                .into(imageView);
+    private void setImage(String url) {
         progressBar.setVisibility(View.GONE);
-        textView.setText(info);
+        ImageFragment fragment = new ImageFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("url", url);
+        fragment.setArguments(bundle);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
-
-    private String getCurrentDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        Date date = new Date(System.currentTimeMillis());
-        return formatter.format(date);
-    }
-
-    private String getPreviousDate(String current) {
-        LocalDate currentDate = LocalDate.parse(current);
-        LocalDate previousDate = currentDate.minusDays(1);
-        String previous = previousDate.toString();
-        return previous;
-    }
-
-    private String getNextDate(String current) {
-        if (getCurrentDate().equals(current)){
-            return current;
-        }
-        LocalDate currentDate = LocalDate.parse(current);
-        LocalDate previousDate = currentDate.plusDays(1);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        String next = format.format(previousDate);
-        return next;
-    }
-
 }
