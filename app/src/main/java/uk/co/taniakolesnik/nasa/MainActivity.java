@@ -1,17 +1,13 @@
 package uk.co.taniakolesnik.nasa;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.palette.graphics.Palette;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -19,7 +15,6 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -144,38 +139,12 @@ public class MainActivity extends YouTubeBaseActivity {
         imageView.setVisibility(View.VISIBLE);
         Picasso.get()
                 .load(imageUrl)
-                .resize(0,500)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .placeholder(R.drawable.placehoulder)
+                .placeholder(new ColorDrawable(getColor(R.color.colorPrimary)))
                 .error(R.drawable.placehoulder)
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        assert imageView != null;
-                        imageView.setImageBitmap(bitmap);
-                        Palette.from(bitmap)
-                                .generate(new Palette.PaletteAsyncListener() {
-                                    @Override
-                                    public void onGenerated(Palette palette) {
-                                        Palette.Swatch swatch = palette.getDarkMutedSwatch();
-                                        if (swatch != null) {
-                                            imageView.setBackgroundColor(swatch.getRgb());
-                                            getWindow().setStatusBarColor(swatch.getRgb());
-                                        }
-                                    }
-                                });
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                        Toast.makeText(getApplicationContext(), "onBitmapFailed", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
+                .fit()
+                .centerInside()
+                .into(imageView);
         progressBar.setVisibility(View.GONE);
         textView.setText(info);
     }
@@ -194,6 +163,9 @@ public class MainActivity extends YouTubeBaseActivity {
     }
 
     private String getNextDate(String current) {
+        if (getCurrentDate().equals(current)){
+            return current;
+        }
         LocalDate currentDate = LocalDate.parse(current);
         LocalDate previousDate = currentDate.plusDays(1);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
