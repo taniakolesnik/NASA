@@ -10,8 +10,7 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import org.apache.commons.lang3.StringUtils;
 
 public class VideoFragment extends YouTubePlayerSupportFragment {
-
-    private static final String TAG = "Monday";
+    private static final String TAG = "Wednesday VideoFragment";
 
     public VideoFragment() {
     }
@@ -21,7 +20,6 @@ public class VideoFragment extends YouTubePlayerSupportFragment {
         VideoFragment fragment = new VideoFragment();
         Bundle bundle = new Bundle();
         bundle.putString("url", url);
-        Log.d(TAG, "onInitializationSuccess: " + url);
         fragment.setArguments(bundle);
         fragment.init();
         return fragment;
@@ -34,11 +32,12 @@ public class VideoFragment extends YouTubePlayerSupportFragment {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
                 if (!wasRestored) {
+                    Log.d(TAG, "onInitializationSuccess: OK");
+                    assert getArguments() != null;
                     String url = getArguments().getString("url");
                     String pre = "https://www.youtube.com/embed/";
                     String post = "?rel=0";
                     String code = StringUtils.substringBetween(url, pre, post);
-                    Log.d(TAG, "onInitializationSuccess: " + code);
                     player.loadVideo(code);
 
                 }
@@ -46,7 +45,6 @@ public class VideoFragment extends YouTubePlayerSupportFragment {
 
             @Override
             public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-                Log.d(TAG, "onInitializationFailure : Failed");
             }
         });
     }

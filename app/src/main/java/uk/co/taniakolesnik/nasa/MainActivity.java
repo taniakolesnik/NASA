@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -27,14 +25,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Monday";
 
-    @BindView(R.id.progressBar)
-    ProgressBar progressBar;
-
     @BindView(R.id.fragment_container)
     FrameLayout fragmentView;
 
-    @BindView(R.id.image_info_textView)
-    TextView textView;
+    private String date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,37 +36,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        progressBar.setVisibility(View.VISIBLE);
-
         Intent intent = getIntent();
         String key = getString(R.string.intent_current_date_key);
-        final String date = intent.getStringExtra(key) != null ? intent.getStringExtra(key) : getCurrentDate();
+        date = intent.getStringExtra(key) != null ? intent.getStringExtra(key) : getCurrentDate();
 
         getApod(date);
-    }
 
-    private String getPreviousDate(String current) {
-        LocalDate currentDate = LocalDate.parse(current);
-        LocalDate previousDate = currentDate.minusDays(1);
-        String previous = previousDate.toString();
-        return previous;
-    }
-
-    private String getNextDate(String current) {
-        if (getCurrentDate().equals(current)) {
-            return current;
-        }
-        LocalDate currentDate = LocalDate.parse(current);
-        LocalDate previousDate = currentDate.plusDays(1);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        String next = format.format(previousDate);
-        return next;
-    }
-
-    private String getCurrentDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        Date date = new Date(System.currentTimeMillis());
-        return formatter.format(date);
+        fragmentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                date=getPreviousDate(date);
+                getApod(date);
+            }
+        });
     }
 
     private void getApod(String date) {
@@ -82,25 +58,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeCall(String date) {
         Client client = ServiceGenerator.createService(Client.class);
-        Call<Result> call = client.getApod(BuildConfig.API_KEY, "2019-05-25", true);
+        Call<Result> call = client.getApod(BuildConfig.API_KEY, date, true);
         call.enqueue(new Callback<Result>() {
             @Override
             public void onResponse(Call<Result> call, Response<Result> response) {
                 if (response.body() != null) {
-                    String mediaType = response.body().getMedia_type();
-                    String imageInfo = getString(R.string.image_info, response.body().getTitle(), response.body().getCopyright());
-                    textView.setText(imageInfo);
-                    Log.d(TAG, "makeCall: imageInfo " + imageInfo);
-                    switch (mediaType) {
-                        case "video":
-                            Log.d(TAG, "makeCall: video");
-                            setVideo(response.body().getUrl());
-                            break;
-                        case "image":
-                            Log.d(TAG, "makeCall: image");
-                            setImage(response.body().getHdurl());
-                            break;
-                    }
+                    Result result = response.body();
+                    String mediaType = result.getMedia_type();
+                    String info = getString(R.string.image_info, result.getTitle(), result.getCopyright());
+                    String url = mediaType.equals("image") ? result.getHdurl() : result.getUrl();
+                    setFragment(url, info, mediaType);
                 } else {
                     Log.d(TAG, "onResponse: response.body() is NULL");
                 }
@@ -113,25 +80,41 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setVideo(final String url) {
-        progressBar.setVisibility(View.GONE);
-        VideoFragment fragment = VideoFragment.newInstance(url);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .commit();
-
-    }
-
-    private void setImage(String url) {
-        progressBar.setVisibility(View.GONE);
-        ImageFragment fragment = new ImageFragment();
+    private void setFragment(String url, String info, String mediaType) {
+        MainFragment fragment = new MainFragment();
         Bundle bundle = new Bundle();
         bundle.putString("url", url);
+        bundle.putString("info", info);
+        bundle.putString("type", mediaType);
         fragment.setArguments(bundle);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .commit();
+    }
+
+    private String getCurrentDate() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        Date date = new Date(System.currentTimeMillis());
+        return formatter.format(date);
+    }
+
+    private String getPreviousDate(String current) {
+
+        LocalDate currentDate = LocalDate.parse(current);
+        LocalDate previousDate = currentDate.minusDays(1);
+        String string = previousDate.toString();
+        return string;
+    }
+
+    private String getNextDate(String current) {
+        if (getCurrentDate().equals(current)) {
+            return current;
+        }
+        LocalDate currentDate = LocalDate.parse(current);
+        LocalDate previousDate = currentDate.plusDays(1);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        String next = format.format(previousDate);
+        return next;
     }
 }
