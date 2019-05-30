@@ -53,7 +53,6 @@ public class MainFragment extends Fragment {
         imageView.setVisibility(View.GONE);
         videoView.setVisibility(View.GONE);
 
-
         String url = getArguments().getString("url");
         String info = getArguments().getString("info");
         String type = getArguments().getString("type");
