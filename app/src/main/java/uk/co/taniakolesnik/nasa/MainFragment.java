@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +20,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainFragment extends Fragment {
-
-    private static final String TAG = "Wednesday MainFragment";
 
     @BindView(R.id.image_view)
     ImageView imageView;
@@ -57,8 +54,6 @@ public class MainFragment extends Fragment {
         String info = getArguments().getString("info");
         String type = getArguments().getString("type");
 
-        Log.d(TAG, "onViewCreated: url is " + url + "; info is " + info + "; type is " + type);
-
         if (type.equals("image")){
             setImage(url);
         } else {
@@ -73,7 +68,6 @@ public class MainFragment extends Fragment {
     }
 
     private void setImage(String url) {
-        Log.d(TAG, "setImage: started");
         imageView.setVisibility(View.VISIBLE);
         Picasso.get()
                 .load(url)
@@ -86,7 +80,6 @@ public class MainFragment extends Fragment {
     }
 
     private void setVideo(final String url) {
-        Log.d(TAG, "setVideo: started");
         videoView.setVisibility(View.VISIBLE);
         VideoFragment fragment = VideoFragment.newInstance(url);
         getFragmentManager()

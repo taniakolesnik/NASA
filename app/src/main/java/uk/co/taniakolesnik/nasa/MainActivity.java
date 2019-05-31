@@ -29,9 +29,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOAD_DAYS_NUMBER=5;
     private int checkSum;
 
-    private HashMap<String, Result> results = new HashMap<>();
+    private HashMap<Integer, Result> results = new HashMap<>();
     private String endDate = getCurrentDate();
     private String startDate = getCurrentDate();
+    private int startPosition = 0;
+    private int endPosition = 0;
 
     @BindView(R.id.fragment_container)
     FrameLayout frameLayout;
@@ -46,20 +48,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadResultsForLoadNumberDays() {
-        startDate =  endDate;
+        startDate = endDate;
         checkSum += LOAD_DAYS_NUMBER;
         for (int i = 0; i < LOAD_DAYS_NUMBER; i++) {
-            makeCall(endDate, new GetResultCallback() {
+            makeCall(endDate, endPosition, new GetResultCallback() {
                 @Override
-                public void onGetData(final Result result) {
-                    results.put(result.getDate(), result);
+                public void onGetData(Result result, int position) {
+                    results.put(position, result);
+                    Log.d(TAG, "onGetData: position " + position + "; date" + result.getDate());
                     if (results.size()==checkSum){
-                        setFragment(results.get(startDate));
+                        Log.d(TAG, "loadResultsForLoadNumberDays onGetData: startPosition " + startPosition
+                                + "; startDate "  + startDate  + "; endPosition " + endPosition + "; endDate " + endDate);
+                        setFragment(results.get(startPosition));
                         new SetOnClickListener().invoke();
                     }
                 }
+
             });
             endDate = getPreviousDate(endDate);
+            endPosition++;
         }
     }
 
@@ -69,11 +76,13 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     startDate=getPreviousDate(startDate);
-                    if (startDate.equals(endDate)) {
-                        Log.d(TAG, "onClick: checkSum is " + checkSum);
+                    startPosition++;
+                    Log.d(TAG, "SetOnClickListener: startPosition " + startPosition
+                            + "; startDate "  + startDate  + "; endPosition " + endPosition + "; endDate " + endDate);
+                    if (startPosition==endPosition) {
                         loadResultsForLoadNumberDays();
                     } else {
-                        Result result = results.get(startDate);
+                        Result result = results.get(startPosition);
                         setFragment(result);
                         Log.d(TAG, "onClick: setFragment for " + result.getDate());
                     }
@@ -82,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void makeCall(final String date, final GetResultCallback getResultCallback) {
+    private void makeCall(final String date, final int position, final GetResultCallback getResultCallback) {
         Client client = ServiceGenerator.createService(Client.class);
         Call<Result> call = client.getApod(BuildConfig.API_KEY, date, true);
         call.enqueue(new Callback<Result>() {
@@ -91,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.body() != null) {
                     Log.d(TAG, "onResponse: response.body() is not NULL " + date);
                     Result result = response.body();
-                    getResultCallback.onGetData(result);
+                    getResultCallback.onGetData(result, position);
 
                 } else {
                     Log.d(TAG, "onResponse: response.body() is NULL");
@@ -110,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         MainFragment fragment = new MainFragment();
         Bundle bundle = new Bundle();
         bundle.putString("url", result.getUrl());
-        bundle.putString("info", result.getTitle());
+        bundle.putString("info", result.getDate());
         bundle.putString("type", result.getMedia_type());
         fragment.setArguments(bundle);
         getSupportFragmentManager()

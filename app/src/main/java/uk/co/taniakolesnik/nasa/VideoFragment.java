@@ -1,7 +1,6 @@
 package uk.co.taniakolesnik.nasa;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -10,7 +9,6 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import org.apache.commons.lang3.StringUtils;
 
 public class VideoFragment extends YouTubePlayerSupportFragment {
-    private static final String TAG = "Wednesday VideoFragment";
 
     public VideoFragment() {
     }
@@ -32,7 +30,6 @@ public class VideoFragment extends YouTubePlayerSupportFragment {
             @Override
             public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player, boolean wasRestored) {
                 if (!wasRestored) {
-                    Log.d(TAG, "onInitializationSuccess: OK");
                     assert getArguments() != null;
                     String url = getArguments().getString("url");
                     String pre = "https://www.youtube.com/embed/";
