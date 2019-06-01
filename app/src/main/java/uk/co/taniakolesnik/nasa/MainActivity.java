@@ -1,10 +1,9 @@
 package uk.co.taniakolesnik.nasa;
 
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.FrameLayout;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -24,9 +23,9 @@ import uk.co.taniakolesnik.nasa.retrofit.ServiceGenerator;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "Friday";
+    private static final String TAG = "Saturday";
 
-    private static final int LOAD_DAYS_NUMBER=10;
+    private static final int LOAD_DAYS_NUMBER=100;
     private int checkSum;
 
     private HashMap<Integer, Result> results = new HashMap<>();
@@ -34,9 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private String startDate = getCurrentDate();
     private int startPosition = 0;
     private int endPosition = 0;
+    private MyFragmentPagerAdapter adapter;
 
-    @BindView(R.id.fragment_container)
-    FrameLayout frameLayout;
+    @BindView(R.id.view_pager)
+    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,38 +62,26 @@ public class MainActivity extends AppCompatActivity {
                                 + "; \nendPosition " + endPosition
                                 + "; \nendDate " + endDate
                                 + "; \nresults size is  " + results.size());
-                        setFragment(results.get(startPosition));
-                        new SetOnClickListener().invoke();
+                        if (adapter==null){
+                            adapter = new MyFragmentPagerAdapter(getSupportFragmentManager(), results, new StatusCallback() {
+                                @Override
+                                public void onPosition(int position) {
+                                    Log.d(TAG, " StatusCallback onPosition: " + position);
+                                    if (position == endPosition) {
+                                        loadResultsForLoadNumberDays();
+                                    }
+                                    startPosition+=position;
+                                }
+                            });
+                            viewPager.setAdapter(adapter);
+                        }
+                        adapter.update(results);
                     }
                 }
 
             });
             endDate = getPreviousDate(endDate);
             endPosition++;
-        }
-    }
-
-    private class SetOnClickListener {
-        void invoke() {
-            frameLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startDate=getPreviousDate(startDate);
-                    startPosition++;
-                    Log.d(TAG, "SetOnClickListener: \nstartPosition " + startPosition
-                            + "; \nstartDate "  + startDate
-                            + "; \nendPosition " + endPosition
-                            + "; \nendDate " + endDate
-                            + "; \nresults size is  " + results.size());
-                    if (startPosition==endPosition) {
-                        loadResultsForLoadNumberDays();
-                    } else {
-                        Result result = results.get(startPosition);
-                        setFragment(result);
-                        Log.d(TAG, "onClick: setFragment for " + result.getDate());
-                    }
-                }
-            });
         }
     }
 
@@ -118,20 +106,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onFailure: " + t.toString());
             }
         });
-    }
-
-    private void setFragment(Result result) {
-        Log.d(TAG, "setFragment: started for " + result.getDate());
-        MainFragment fragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString("url", result.getUrl());
-        bundle.putString("info", result.getDate());
-        bundle.putString("type", result.getMedia_type());
-        fragment.setArguments(bundle);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .commit();
     }
 
     private String getCurrentDate() {

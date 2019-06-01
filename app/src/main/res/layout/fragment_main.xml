@@ -23,7 +23,7 @@
         <FrameLayout
             android:id="@+id/video_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"  />
+            android:layout_height="500dp"  />
 
         <ProgressBar
             android:id="@+id/progressBar"
