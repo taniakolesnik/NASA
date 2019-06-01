@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Friday";
 
-    private static final int LOAD_DAYS_NUMBER=5;
+    private static final int LOAD_DAYS_NUMBER=10;
     private int checkSum;
 
     private HashMap<Integer, Result> results = new HashMap<>();
@@ -57,8 +57,11 @@ public class MainActivity extends AppCompatActivity {
                     results.put(position, result);
                     Log.d(TAG, "onGetData: position " + position + "; date" + result.getDate());
                     if (results.size()==checkSum){
-                        Log.d(TAG, "loadResultsForLoadNumberDays onGetData: startPosition " + startPosition
-                                + "; startDate "  + startDate  + "; endPosition " + endPosition + "; endDate " + endDate);
+                        Log.d(TAG, "loadResultsForLoadNumberDays: \nstartPosition " + startPosition
+                                + "; \nstartDate "  + startDate
+                                + "; \nendPosition " + endPosition
+                                + "; \nendDate " + endDate
+                                + "; \nresults size is  " + results.size());
                         setFragment(results.get(startPosition));
                         new SetOnClickListener().invoke();
                     }
@@ -77,8 +80,11 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     startDate=getPreviousDate(startDate);
                     startPosition++;
-                    Log.d(TAG, "SetOnClickListener: startPosition " + startPosition
-                            + "; startDate "  + startDate  + "; endPosition " + endPosition + "; endDate " + endDate);
+                    Log.d(TAG, "SetOnClickListener: \nstartPosition " + startPosition
+                            + "; \nstartDate "  + startDate
+                            + "; \nendPosition " + endPosition
+                            + "; \nendDate " + endDate
+                            + "; \nresults size is  " + results.size());
                     if (startPosition==endPosition) {
                         loadResultsForLoadNumberDays();
                     } else {
