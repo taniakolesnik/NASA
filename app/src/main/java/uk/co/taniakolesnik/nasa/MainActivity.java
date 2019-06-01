@@ -25,13 +25,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Saturday";
 
-    private static final int LOAD_DAYS_NUMBER=100;
+    private static final int LOAD_DAYS_NUMBER=5;
     private int checkSum;
 
     private HashMap<Integer, Result> results = new HashMap<>();
     private String endDate = getCurrentDate();
     private String startDate = getCurrentDate();
-    private int startPosition = 0;
     private int endPosition = 0;
     private MyFragmentPagerAdapter adapter;
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                     results.put(position, result);
                     Log.d(TAG, "onGetData: position " + position + "; date" + result.getDate());
                     if (results.size()==checkSum){
-                        Log.d(TAG, "loadResultsForLoadNumberDays: \nstartPosition " + startPosition
+                        Log.d(TAG, "loadResultsForLoadNumberDays: "
                                 + "; \nstartDate "  + startDate
                                 + "; \nendPosition " + endPosition
                                 + "; \nendDate " + endDate
@@ -67,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onPosition(int position) {
                                     Log.d(TAG, " StatusCallback onPosition: " + position);
-                                    if (position == endPosition) {
+                                    if (position == endPosition - 1) {
                                         loadResultsForLoadNumberDays();
                                     }
-                                    startPosition+=position;
+
                                 }
                             });
                             viewPager.setAdapter(adapter);

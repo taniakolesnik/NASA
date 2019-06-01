@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,12 +71,10 @@ public class MainFragment extends Fragment {
     }
 
     private void setImage(String url) {
-        Log.d(TAG, "setImage: " + url);
         imageView.setVisibility(View.VISIBLE);
         videoView.setVisibility(View.GONE);
         Picasso.get()
                 .load(url)
-              //  .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .placeholder(new ColorDrawable(getActivity().getColor(R.color.colorPrimary)))
                 .error(R.drawable.placehoulder)
                 .fit()
@@ -95,5 +92,7 @@ public class MainFragment extends Fragment {
                 .commit();
 
     }
+
+
 
 }
