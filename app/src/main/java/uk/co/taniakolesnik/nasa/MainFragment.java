@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 public class MainFragment extends Fragment {
 
@@ -83,12 +83,14 @@ public class MainFragment extends Fragment {
         videoView.setVisibility(View.GONE);
 
         Drawable placehoulder = new ColorDrawable(getActivity().getColor(R.color.colorPrimary));
-        Picasso.get()
+
+        Glide.with(getActivity())
                 .load(url)
+                .centerCrop()
                 .placeholder(placehoulder)
-                .fit()
-                .centerInside()
+                .crossFade()
                 .into(imageView);
+
     }
 
     private void setYouTubeVideo(final String url) {

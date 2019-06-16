@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import java.util.HashMap;
 
@@ -53,13 +53,14 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<ListRecyclerVi
 
 
         Drawable placeholder = new ColorDrawable(context.getResources().getColor(R.color.colorPrimaryDark));
-            Picasso.get()
-                    .load(imageUrl)
-                    .placeholder(placeholder)
-                    .error(R.drawable.ic_launcher_background)
-                    .resize(0, 200)
-                    .centerCrop()
-                    .into(viewHolder.imageListView);
+
+        Glide.with(context)
+                .load(imageUrl)
+                .centerCrop()
+                .placeholder(placeholder)
+                .crossFade()
+                .into(viewHolder.imageListView);
+
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
