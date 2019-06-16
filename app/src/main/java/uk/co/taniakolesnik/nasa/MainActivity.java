@@ -1,8 +1,11 @@
 package uk.co.taniakolesnik.nasa;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
@@ -23,64 +26,46 @@ import uk.co.taniakolesnik.nasa.retrofit.ServiceGenerator;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "Saturday";
+    private static final String TAG = "Thursday";
 
-    private static final int LOAD_DAYS_NUMBER=5;
-    private int checkSum;
+    @BindView(R.id.recyclerView)
+    RecyclerView recyclerView;
+
+    private String endDate = getCurrentDate();
+    //private int endPosition = 0;
+
+    public static final int LOAD_DAYS_NUMBER = 100;
 
     private HashMap<Integer, Result> results = new HashMap<>();
-    private String endDate = getCurrentDate();
-    private String startDate = getCurrentDate();
-    private int endPosition = 0;
-    private MyFragmentPagerAdapter adapter;
+    private ListRecyclerViewAdapter adapter;
 
-    @BindView(R.id.view_pager)
-    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         loadResultsForLoadNumberDays();
 
     }
 
     private void loadResultsForLoadNumberDays() {
-        startDate = endDate;
-        checkSum += LOAD_DAYS_NUMBER;
         for (int i = 0; i < LOAD_DAYS_NUMBER; i++) {
-            makeCall(endDate, endPosition, new GetResultCallback() {
+            makeCall(endDate, i, new GetResultCallback() {
                 @Override
                 public void onGetData(Result result, int position) {
                     results.put(position, result);
-                    Log.d(TAG, "onGetData: position " + position + "; date" + result.getDate());
-                    if (results.size()==checkSum){
-                        Log.d(TAG, "loadResultsForLoadNumberDays: "
-                                + "; \nstartDate "  + startDate
-                                + "; \nendPosition " + endPosition
-                                + "; \nendDate " + endDate
-                                + "; \nresults size is  " + results.size());
-                        if (adapter==null){
-                            adapter = new MyFragmentPagerAdapter(getSupportFragmentManager(), results, new StatusCallback() {
-                                @Override
-                                public void onPosition(int position) {
-                                    Log.d(TAG, " StatusCallback onPosition: " + position);
-                                    if (position == endPosition - 1) {
-                                        loadResultsForLoadNumberDays();
-                                    }
-
-                                }
-                            });
-                            viewPager.setAdapter(adapter);
+                        if (adapter == null) {
+                            recyclerView.setLayoutManager(new GridLayoutManager(getApplicationContext(),
+                                    calculateNumbeOfColumns(getApplicationContext())));
+                            adapter = new ListRecyclerViewAdapter(getApplicationContext(), results);
+                            recyclerView.setAdapter(adapter);
                         }
                         adapter.update(results);
-                    }
                 }
-
             });
             endDate = getPreviousDate(endDate);
-            endPosition++;
         }
     }
 
@@ -91,12 +76,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Result> call, Response<Result> response) {
                 if (response.body() != null) {
-                    Log.d(TAG, "onResponse: response.body() is not NULL " + date);
                     Result result = response.body();
                     getResultCallback.onGetData(result, position);
-
                 } else {
-                    Log.d(TAG, "onResponse: response.body() is NULL");
+                    Log.d(TAG, "makeCall onResponse: response.body() is NULL");
                 }
             }
 
@@ -119,4 +102,13 @@ public class MainActivity extends AppCompatActivity {
         String string = previousDate.toString();
         return string;
     }
+
+    //https://stackoverflow.com/questions/33575731/gridlayoutmanager-how-to-auto-fit-columns
+    public static int calculateNumbeOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float widthDp = displayMetrics.widthPixels / displayMetrics.density;
+        int noOfColumns = (int) (widthDp / 180);
+        return noOfColumns;
+    }
+
 }

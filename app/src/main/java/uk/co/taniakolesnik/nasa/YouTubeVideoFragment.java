@@ -8,16 +8,16 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class VideoFragment extends YouTubePlayerSupportFragment {
+public class YouTubeVideoFragment extends YouTubePlayerSupportFragment {
 
 
 
-    public VideoFragment() {
+    public YouTubeVideoFragment() {
     }
 
-    public static VideoFragment newInstance(String url) {
+    public static YouTubeVideoFragment newInstance(String url) {
 
-        VideoFragment fragment = new VideoFragment();
+        YouTubeVideoFragment fragment = new YouTubeVideoFragment();
         Bundle bundle = new Bundle();
         bundle.putString("url", url);
         fragment.setArguments(bundle);

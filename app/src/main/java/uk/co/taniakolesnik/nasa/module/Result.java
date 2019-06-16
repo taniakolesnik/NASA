@@ -3,7 +3,9 @@ package uk.co.taniakolesnik.nasa.module;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Result {
+import java.io.Serializable;
+
+public class Result implements Serializable {
 
     @SerializedName("copyright")
     @Expose
@@ -107,5 +109,17 @@ public class Result {
     }
 
 
-
+    @Override
+    public String toString() {
+        return "Result{" +
+                "copyright='" + copyright + '\'' +
+                ", date='" + date + '\'' +
+                ", explanation='" + explanation + '\'' +
+                ", hdurl='" + hdurl + '\'' +
+                ", media_type='" + media_type + '\'' +
+                ", service_version='" + service_version + '\'' +
+                ", title='" + title + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

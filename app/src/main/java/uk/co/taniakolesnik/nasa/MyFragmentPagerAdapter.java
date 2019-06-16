@@ -10,34 +10,25 @@ import uk.co.taniakolesnik.nasa.module.Result;
 
 public class MyFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
-    private static final String TAG = "MyFragmentPagerAdapter";
     private HashMap<Integer, Result> results;
-    private StatusCallback callback;
 
-    public MyFragmentPagerAdapter(FragmentManager fragmentManager, HashMap<Integer, Result> results, StatusCallback callback) {
+    public MyFragmentPagerAdapter(FragmentManager fragmentManager, HashMap<Integer, Result> results) {
         super(fragmentManager);
         this.results = results;
-        this.callback = callback;
-    }
-
-    void update(HashMap<Integer, Result> newResults){
-        results = newResults;
-        notifyDataSetChanged();
     }
 
     @Override
     public Fragment getItem(int i) {
         Result result = results.get(i);
-        String url =  result.getUrl();
-        String info =  result.getDate();
-        String type =  result.getMedia_type();
-        callback.onPosition(i);
+        String url = result != null ? result.getUrl() : null;
+        String info = result != null ? result.getDate() : null;
+        String type = result != null ? result.getMedia_type() : null;
         return MainFragment.newInstance(url, info, type);
     }
 
     @Override
     public int getCount() {
-        return 100;
+        return MainActivity.LOAD_DAYS_NUMBER;
     }
 
 }

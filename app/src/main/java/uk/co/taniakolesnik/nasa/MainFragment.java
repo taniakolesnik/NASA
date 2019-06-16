@@ -1,6 +1,7 @@
 package uk.co.taniakolesnik.nasa;
 
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -53,18 +54,25 @@ public class MainFragment extends Fragment {
         videoView = view.findViewById(R.id.video_container);
 
         progressBar.setVisibility(View.GONE);
-        String url = getArguments().getString("url");
-        String info = getArguments().getString("info");
-        String type = getArguments().getString("type");
+        String url = getArguments() != null ? getArguments().getString("url") : null;
+        String info = getArguments() != null ? getArguments().getString("info") : null;
+        String type = getArguments() != null ? getArguments().getString("type") : null;
 
-        if (type.equals("image")){
-            setImage(url);
-        } else {
-            setVideo(url);
+        if (type != null) {
+            if (type.equals("image")){
+                setImage(url);
+            } else if (url != null) {
+                if (url.contains("youtube")) {
+                    setYouTubeVideo(url);
+                } else {
+                    setImage("https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png");
+                }
+            }
         }
 
         setInfo(info);
     }
+
 
     private void setInfo(String info) {
         textView.setText(info);
@@ -73,19 +81,20 @@ public class MainFragment extends Fragment {
     private void setImage(String url) {
         imageView.setVisibility(View.VISIBLE);
         videoView.setVisibility(View.GONE);
+
+        Drawable placehoulder = new ColorDrawable(getActivity().getColor(R.color.colorPrimary));
         Picasso.get()
                 .load(url)
-                .placeholder(new ColorDrawable(getActivity().getColor(R.color.colorPrimary)))
-                .error(R.drawable.placehoulder)
+                .placeholder(placehoulder)
                 .fit()
                 .centerInside()
                 .into(imageView);
     }
 
-    private void setVideo(final String url) {
+    private void setYouTubeVideo(final String url) {
         imageView.setVisibility(View.GONE);
         videoView.setVisibility(View.VISIBLE);
-        VideoFragment fragment = VideoFragment.newInstance(url);
+        YouTubeVideoFragment fragment = YouTubeVideoFragment.newInstance(url);
         getChildFragmentManager()
                 .beginTransaction()
                 .replace(R.id.video_container, fragment)
@@ -93,6 +102,8 @@ public class MainFragment extends Fragment {
 
     }
 
+    private void setVideo(String url) {
+    }
 
 
 }
